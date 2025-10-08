@@ -1,8 +1,9 @@
-import NextAuth, { NextAuthOptions, User } from 'next-auth';
+import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
 import { connectDB } from '@/lib/db/mongodb';
 import UserModel from '@/lib/db/models/User';
+import { NextAuthOptions, User } from 'next-auth'; 
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -12,7 +13,18 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" }
       },
-      async authorize(credentials): Promise<User | null> {
+
+
+
+      // app/api/auth/[...nextauth]/route.ts
+
+// ... inside CredentialsProvider
+
+      async authorize(credentials): Promise< User | null> {
+        // Add explicit non-null checks or type guards here to narrow the type.
+        // A direct non-null assertion (!) should also work if you've already
+        // checked for existence above.
+        
         if (!credentials?.email || !credentials?.password) {
           throw new Error('Invalid credentials');
         }
@@ -21,32 +33,31 @@ export const authOptions: NextAuthOptions = {
           await connectDB();
           
           const user = await UserModel.findOne({ 
-            email: credentials.email.toLowerCase() 
+            // Fix: Cast credentials.email to string to resolve ts(2339)
+            email: (credentials.email as string).toLowerCase() 
           });
 
           if (!user || !user.passwordHash) {
             throw new Error('Invalid credentials');
           }
 
+          // Fix: Cast credentials.password to string to resolve ts(2769) overloads
           const isValid = await bcrypt.compare(
-            credentials.password, 
+            credentials.password as string, 
             user.passwordHash
           );
 
           if (!isValid) {
             throw new Error('Invalid credentials');
           }
+// ...
 
-          return {
-            id: user._id.toString(),
-            email: user.email,
-            name: user.profile.name,
-          };
-        } catch (error) {
-          console.error('Auth error:', error);
-          throw new Error('Authentication failed');
-        }
-      }
+
+
+
+
+
+
     })
   ],
   session: {
@@ -60,7 +71,8 @@ export const authOptions: NextAuthOptions = {
     newUser: '/dashboard',
   },
   callbacks: {
-    async jwt({ token, user, trigger, session }) {
+    // Add explicit types for all arguments in the jwt callback
+    async jwt({ token, user, trigger, session }: { token: any; user: any; trigger: any; session: any }) { 
       if (user) {
         token.id = user.id;
         token.email = user.email;
@@ -74,7 +86,8 @@ export const authOptions: NextAuthOptions = {
       
       return token;
     },
-    async session({ session, token }) {
+    // Add explicit types for all arguments in the session callback
+    async session({ session, token }: { session: any; token: any }) { 
       if (session.user) {
         session.user.id = token.id as string;
         session.user.email = token.email as string;
@@ -82,12 +95,9 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
-    async redirect({ url, baseUrl }) {
-      // Redirect to dashboard after login
-      if (url.startsWith('/login') || url.startsWith('/register')) {
-        return `${baseUrl}/dashboard`;
-      }
-      return url.startsWith(baseUrl) ? url : baseUrl;
+    // The redirect callback is already correctly typed with destructured arguments.
+    async redirect({ url, baseUrl }) { 
+      // ... (existing code)
     }
   },
   events: {
