@@ -1,10 +1,11 @@
 import LoginForm from '@/components/auth/LoginForm';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { auth } from "@/auth"; // Correct import from the root auth.ts
+// import { authOptions } from '@/app/api/auth/[...nextauth]/route'; <-- REMOVED: This is no longer exported or needed.
 import { redirect } from 'next/navigation';
 
 export default async function LoginPage() {
-  const session = await getServerSession(authOptions);
+  // auth() is the correct way to get the session on the server in NextAuth v5
+  const session = await auth(); 
   
   if (session) {
     redirect('/dashboard');

@@ -1,4 +1,4 @@
-import { getServerSession } from 'next-auth';
+import { auth } from "@/auth";
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { connectDB } from '@/lib/db/mongodb';
 import MoodEntry from '@/lib/db/models/MoodEntry';
@@ -37,7 +37,7 @@ async function getDashboardData(userId: string) {
 }
 
 export default async function EnhancedDashboard() {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   const data = await getDashboardData(session!.user!.id);
 
   return (

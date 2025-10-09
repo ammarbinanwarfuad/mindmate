@@ -1,36 +1,25 @@
-import { withAuth } from 'next-auth/middleware';
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
+import { auth } from "@/auth";
 
-export default withAuth(
-  function middleware(req) {
-    const token = req.nextauth.token;
-    const path = req.nextUrl.pathname;
+export async function middleware(req: Request) {
+  const session = await auth();
 
-    // Allow access to protected routes
-    if (token) {
-      return NextResponse.next();
-    }
-
-    // Redirect to login if not authenticated
-    const loginUrl = new URL('/login', req.url);
-    loginUrl.searchParams.set('callbackUrl', path);
-    return NextResponse.redirect(loginUrl);
-  },
-  {
-    callbacks: {
-      authorized: ({ token }) => !!token,
-    },
+  if (!session) {
+    const url = new URL("/api/auth/signin", req.url);
+    return NextResponse.redirect(url);
   }
-);
 
-// Protect these routes
+  return NextResponse.next();
+}
+
 export const config = {
   matcher: [
-    '/dashboard/:path*',
-    '/chat/:path*',
-    '/mood/:path*',
-    '/matches/:path*',
-    '/community/:path*',
-    '/profile/:path*',
+    "/dashboard/:path*",
+    "/chat/:path*",
+    "/mood/:path*",
+    "/matches/:path*",
+    "/community/:path*",
+    "/profile/:path*",
+    "/resources/:path*",
   ],
 };

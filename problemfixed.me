@@ -1,0 +1,525 @@
+# 🔧 MindMate Project - Complete Error Fixes
+
+## Critical Errors Found & Solutions
+
+### 1. ❌ **Link Component Error in crisis/page.tsx**
+
+**Location:** `app/(dashboard)/resources/crisis/page.tsx`
+
+**Error:** Line has `<a` tag instead of `<Link>` or proper `<a>` tag
+
+**Fix:**
+```tsx
+// WRONG (Line ~67):
+<a // <-- Corrected Line
+  href={`tel:${resource.phone}`}
+
+// CORRECT:
+<a
+  href={`tel:${resource.phone}`}
+  className="block bg-white px-4 py-3 rounded-lg font-semibold text-center hover:shadow-md transition-shadow"
+>
+  📞 Call: {resource.phone}
+</a>
+```
+
+---
+
+### 2. ❌ **Missing Gemini Configuration in Constants**
+
+**Location:** `lib/utils/constants.ts`
+
+**Error:** Still references OpenAI in comments
+
+**Fix:**
+```typescript
+// WRONG:
+// Changed from OPENAI_CONFIG to GEMINI_CONFIG
+
+// CORRECT:
+export const GEMINI_CONFIG = {
+  model: 'gemini-pro',
+  temperature: 0.7,
+  maxOutputTokens: 500,
+  topK: 40,
+  topP: 0.95,
+};
+
+// Remove all OpenAI references
+```
+
+---
+
+### 3. ❌ **Package.json Script Issues**
+
+**Location:** `package.json`
+
+**Error:** Missing seed script configuration
+
+**Fix:**
+```json
+{
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit",
+    "check-env": "ts-node scripts/check-env.ts",
+    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} scripts/seed-db.ts",
+    "seed:full": "ts-node --compiler-options {\"module\":\"CommonJS\"} scripts/seed-comprehensive.ts",
+    "test": "jest",
+    "test:watch": "jest --watch"
+  }
+}
+```
+
+---
+
+### 4. ❌ **Middleware Route Matcher Issue**
+
+**Location:** `middleware.ts`
+
+**Error:** Parentheses in route paths may cause issues
+
+**Fix:**
+```typescript
+export const config = {
+  matcher: [
+    '/dashboard/:path*',
+    '/chat/:path*',
+    '/mood/:path*',
+    '/matches/:path*',
+    '/community/:path*',
+    '/profile/:path*',
+    '/resources/:path*',
+  ],
+};
+```
+
+---
+
+### 5. ❌ **Environment Variable Check Issues**
+
+**Location:** `scripts/check-env.ts`
+
+**Error:** Should check for GEMINI_API_KEY, not OPENAI_API_KEY
+
+**Fix:**
+```typescript
+const requiredEnvVars = [
+  'MONGODB_URI',
+  'NEXTAUTH_SECRET',
+  'NEXTAUTH_URL',
+  'GEMINI_API_KEY',  // Correct
+  'ENCRYPTION_KEY',
+];
+```
+
+---
+
+### 6. ❌ **Missing Error Handling in Chat Route**
+
+**Location:** `app/api/chat/message/route.ts`
+
+**Fix:**
+```typescript
+export async function POST(request: NextRequest) {
+  try {
+    const session = await auth();
+    
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const body = await request.json();
+    const { message } = body;
+
+    if (!message || typeof message !== 'string' || message.trim().length === 0) {
+      return NextResponse.json(
+        { error: 'Message is required' },
+        { status: 400 }
+      );
+    }
+
+    // Add length validation
+    if (message.length > 2000) {
+      return NextResponse.json(
+        { error: 'Message too long (max 2000 characters)' },
+        { status: 400 }
+      );
+    }
+
+    // ... rest of code
+  } catch (error) {
+    console.error('Chat error:', error);
+    return NextResponse.json(
+      { error: 'Failed to process message' },
+      { status: 500 }
+    );
+  }
+}
+```
+
+---
+
+### 7. ❌ **tsconfig.json Path Aliases**
+
+**Location:** `tsconfig.json`
+
+**Ensure this configuration:**
+```json
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}
+```
+
+---
+
+### 8. ❌ **Encryption Key Validation**
+
+**Location:** `lib/services/encryption.ts`
+
+**Fix:**
+```typescript
+import crypto from 'crypto';
+
+const ALGORITHM = 'aes-256-gcm';
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY;
+
+if (!ENCRYPTION_KEY) {
+  throw new Error('ENCRYPTION_KEY is not defined in environment variables');
+}
+
+if (ENCRYPTION_KEY.length !== 64) {
+  throw new Error('ENCRYPTION_KEY must be exactly 64 characters (32 bytes in hex)');
+}
+
+const KEY = Buffer.from(ENCRYPTION_KEY, 'hex');
+
+export function encryptText(text: string) {
+  try {
+    const iv = crypto.randomBytes(16);
+    const cipher = crypto.createCipheriv(ALGORITHM, KEY, iv);
+    
+    let encrypted = cipher.update(text, 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+    
+    const authTag = cipher.getAuthTag();
+    
+    return {
+      encrypted,
+      iv: iv.toString('hex'),
+      authTag: authTag.toString('hex')
+    };
+  } catch (error) {
+    console.error('Encryption error:', error);
+    throw new Error('Failed to encrypt text');
+  }
+}
+
+export function decryptText(encryptedData: { encrypted: string; iv: string; authTag: string }) {
+  try {
+    const decipher = crypto.createDecipheriv(
+      ALGORITHM,
+      KEY,
+      Buffer.from(encryptedData.iv, 'hex')
+    );
+    
+    decipher.setAuthTag(Buffer.from(encryptedData.authTag, 'hex'));
+    
+    let decrypted = decipher.update(encryptedData.encrypted, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+    
+    return decrypted;
+  } catch (error) {
+    console.error('Decryption error:', error);
+    throw new Error('Failed to decrypt text');
+  }
+}
+```
+
+---
+
+### 9. ❌ **Missing Database Connection Error Handling**
+
+**Location:** `lib/db/mongodb.ts`
+
+**Fix:**
+```typescript
+import mongoose from 'mongoose';
+
+const MONGODB_URI = process.env.MONGODB_URI;
+
+if (!MONGODB_URI) {
+  throw new Error('Please define MONGODB_URI in .env.local');
+}
+
+interface MongooseCache {
+  conn: typeof mongoose | null;
+  promise: Promise<typeof mongoose> | null;
+}
+
+declare global {
+  var mongoose: MongooseCache;
+}
+
+let cached: MongooseCache = global.mongoose || { conn: null, promise: null };
+
+if (!global.mongoose) {
+  global.mongoose = cached;
+}
+
+export async function connectDB() {
+  if (cached.conn) {
+    return cached.conn;
+  }
+
+  if (!cached.promise) {
+    const opts = {
+      bufferCommands: false,
+      maxPoolSize: 10,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+    };
+
+    cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
+      console.log('✅ MongoDB connected successfully');
+      return mongoose;
+    });
+  }
+
+  try {
+    cached.conn = await cached.promise;
+  } catch (e) {
+    cached.promise = null;
+    console.error('❌ MongoDB connection error:', e);
+    throw e;
+  }
+
+  return cached.conn;
+}
+```
+
+---
+
+### 10. ❌ **Next.js Configuration Issues**
+
+**Location:** `next.config.js`
+
+**Fix:**
+```javascript
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: true,
+  swcMinify: true,
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+    ],
+  },
+  env: {
+    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+  },
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error', 'warn'],
+    } : false,
+  },
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'X-DNS-Prefetch-Control',
+            value: 'on'
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'SAMEORIGIN'
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff'
+          },
+        ],
+      },
+    ];
+  },
+};
+
+module.exports = nextConfig;
+```
+
+---
+
+## 🚀 Complete Setup Commands
+
+### 1. Initial Setup
+```bash
+# Install dependencies
+npm install
+
+# Install Gemini AI
+npm install @google/generative-ai
+
+# Remove OpenAI (if present)
+npm uninstall openai
+```
+
+### 2. Environment Setup
+```bash
+# Copy environment template
+cp .env.example .env.local
+
+# Generate encryption key
+openssl rand -hex 32
+
+# Generate NextAuth secret
+openssl rand -base64 32
+```
+
+### 3. Database Setup
+```bash
+# Check environment
+npm run check-env
+
+# Seed database
+npm run seed:full
+```
+
+### 4. Development
+```bash
+# Type check
+npm run type-check
+
+# Build
+npm run build
+
+# Start development
+npm run dev
+```
+
+---
+
+## 📋 Complete .env.local Template
+
+```bash
+# Database
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/mindmate?retryWrites=true&w=majority
+
+# NextAuth
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your_nextauth_secret_here
+
+# Google Gemini AI (NOT OpenAI!)
+GEMINI_API_KEY=your_gemini_api_key_here
+
+# Encryption (Generate with: openssl rand -hex 32)
+ENCRYPTION_KEY=your_64_character_hex_string_here
+
+# Node Environment
+NODE_ENV=development
+```
+
+---
+
+## ✅ Verification Checklist
+
+- [ ] All files use Gemini, not OpenAI
+- [ ] Environment variables are correctly set
+- [ ] MongoDB connection works
+- [ ] Type checking passes (`npm run type-check`)
+- [ ] Build succeeds (`npm run build`)
+- [ ] Database seeding works (`npm run seed:full`)
+- [ ] Chat functionality works with Gemini
+- [ ] Authentication works
+- [ ] All imports are correct
+- [ ] No console errors in browser
+
+---
+
+## 🐛 Common Runtime Errors & Fixes
+
+### Error: "GEMINI_API_KEY is not defined"
+**Fix:** Check `.env.local` file exists and contains GEMINI_API_KEY
+
+### Error: "Module not found: @/..."
+**Fix:** Check `tsconfig.json` has correct path aliases
+
+### Error: "Cannot find module 'crypto'"
+**Fix:** Crypto is a Node.js built-in, ensure you're using Node 18+
+
+### Error: "MongoDB connection failed"
+**Fix:** Verify MONGODB_URI is correct and IP is whitelisted in MongoDB Atlas
+
+### Error: "NextAuth session undefined"
+**Fix:** Ensure NEXTAUTH_SECRET and NEXTAUTH_URL are set correctly
+
+---
+
+## 📝 Testing Steps
+
+1. **Test Gemini Connection:**
+```bash
+npx ts-node test-gemini.ts
+```
+
+2. **Test API Routes:**
+```bash
+# Start dev server
+npm run dev
+
+# Test endpoints:
+# - http://localhost:3000/api/health
+# - http://localhost:3000/api/auth/[...nextauth]
+```
+
+3. **Test Chat:**
+- Login with: `alice@university.edu` / `Demo123!`
+- Navigate to Chat
+- Send a message
+- Verify Gemini responds
+
+---
+
+## 🎯 Priority Fixes (Do These First!)
+
+1. Fix the Link component in `crisis/page.tsx`
+2. Update all environment variable references
+3. Fix middleware route matchers
+4. Add error handling to all API routes
+5. Test Gemini integration
+
+After these fixes, your project should work perfectly! 🚀

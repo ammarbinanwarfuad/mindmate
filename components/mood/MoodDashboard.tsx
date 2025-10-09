@@ -185,15 +185,15 @@ export default function MoodDashboard() {
       </div>
 
       {/* Quick Actions */}
-      <div className="flex justify-center">
-        
-          href="/mood/new"
-          className="flex items-center gap-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-4 rounded-full shadow-lg hover:shadow-xl transition-all font-semibold"
-        >
-          <span className="text-2xl">+</span>
-          <span>Log Today's Mood</span>
-        </a>
-      </div>
+<div className="flex justify-center">
+  <a
+    href="/mood/new"
+    className="flex items-center gap-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-4 rounded-full shadow-lg hover:shadow-xl transition-all font-semibold"
+  >
+    <span className="text-2xl">+</span>
+    <span>Log Today's Mood</span>
+  </a>
+</div>
     </div>
   );
 }
