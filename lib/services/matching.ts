@@ -55,7 +55,7 @@ export async function findMatches(userId: string): Promise<MatchCandidate[]> {
 
     if (compatibility.score >= 60) {
       matches.push({
-        userId: candidate._id.toString(),
+        userId: (candidate._id as any).toString(),
         score: compatibility.score,
         sharedStruggles: compatibility.sharedStruggles,
         reason: compatibility.reason,

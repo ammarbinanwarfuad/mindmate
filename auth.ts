@@ -1,11 +1,9 @@
-import NextAuth from "next-auth";
+import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/db/mongodb"; 
 import UserModel from "@/lib/db/models/User"; 
-import { DefaultJWT } from "next-auth/jwt"; 
-import { DefaultSession } from "next-auth"; 
 
 // Custom user type must match what is returned by authorize
 interface AuthUser {
@@ -14,13 +12,7 @@ interface AuthUser {
   name: string;
 }
 
-// Define the payload types for the signOut event helper
-// This is necessary to correctly handle the union type (token OR session) that NextAuth passes.
-type SignOutPayload = 
-    { token: DefaultJWT} | // JWT strategy payload
-    { session: DefaultSession | null }; // Adapter strategy payload
-
-export const { handlers, auth, signIn, signOut } = NextAuth({
+export const authOptions: NextAuthOptions = {
   // --- PROVIDERS ---
   providers: [
     GoogleProvider({
@@ -115,28 +107,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
 
-  // --- EVENTS ---
-  events: {
-    async signIn({ user, isNewUser }) {
-      console.log("User signed in:", user.email, isNewUser ? "(New User)" : "");
-    },
-    
-    // Fix for the final TypeScript error (Error 2) on the signOut event
-    async signOut(payload) {
-      if ('token' in payload && payload.token) {
-        // If the payload contains 'token' (JWT strategy)
-        console.log("User signed out:", payload.token.email || "unknown user"); 
-      } else if ('session' in payload && payload.session) {
-        // FIX 3: Check if payload.session exists, and access email directly from the raw session object
-        // Note: For database strategy, the session object might contain session.userId, not session.user.
-        // Since you are using JWT, this branch is often unused, but this typing handles the error.
-        const userEmail = (payload.session as any)?.user?.email || (payload.session as any).email;
-        console.log("User signed out:", userEmail || "unknown user");
-      }
-    },
-  },
-
   // --- SECRET & DEBUG ---
   secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV === "development",
-});
+};

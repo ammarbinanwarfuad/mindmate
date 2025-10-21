@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from "@/auth";
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { getServerSession } from "next-auth";
+import { authOptions } from '@/auth';
 import { connectDB } from '@/lib/db/mongodb';
 import ForumPost from '@/lib/db/models/ForumPost';
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await auth();
-    
+    const session = await getServerSession(authOptions);
+
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
       query.category = category;
     }
 
-    const sortOptions: any = sort === 'popular' 
+    const sortOptions: any = sort === 'popular'
       ? { likes: -1, views: -1 }
       : { createdAt: -1 };
 
@@ -49,8 +49,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth();
-    
+    const session = await getServerSession(authOptions);
+
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

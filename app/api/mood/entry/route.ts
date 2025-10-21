@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from "@/auth";
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { getServerSession } from "next-auth";
+import { authOptions } from '@/auth';
 import { connectDB } from '@/lib/db/mongodb';
 import MoodEntry from '@/lib/db/models/MoodEntry';
 import { encryptText } from '@/lib/services/encryption';
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth();
-    
+    const session = await getServerSession(authOptions);
+
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -58,8 +58,8 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await auth();
-    
+    const session = await getServerSession(authOptions);
+
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -69,12 +69,12 @@ export async function GET(request: NextRequest) {
 
     await connectDB();
 
-    const entries = await MoodEntry.find({ 
-      userId: session.user.id 
+    const entries = await MoodEntry.find({
+      userId: session.user.id
     })
-    .sort({ date: -1 })
-    .limit(30)
-    .select('-journalEntry'); // Don't send encrypted data
+      .sort({ date: -1 })
+      .limit(30)
+      .select('-journalEntry'); // Don't send encrypted data
 
     return NextResponse.json({ entries });
 

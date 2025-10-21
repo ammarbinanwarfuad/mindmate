@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
-import { auth } from "@/auth";
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { getServerSession } from "next-auth";
+import { authOptions } from '@/auth';
 import { getUserNotifications } from '@/lib/services/notifications';
 
 export async function GET() {
   try {
-    const session = await auth();
-    
+    const session = await getServerSession(authOptions);
+
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -14,9 +14,9 @@ export async function GET() {
     const notifications = await getUserNotifications(session.user.id);
     const unreadCount = notifications.filter(n => !n.read).length;
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       notifications,
-      unreadCount 
+      unreadCount
     });
   } catch (error) {
     console.error('Notifications fetch error:', error);

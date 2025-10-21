@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { auth } from "@/auth";
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { getServerSession } from "next-auth";
+import { authOptions } from '@/auth';
 import { connectDB } from '@/lib/db/mongodb';
 import MoodEntry from '@/lib/db/models/MoodEntry';
 import Conversation from '@/lib/db/models/Conversation';
@@ -9,8 +9,8 @@ import Match from '@/lib/db/models/Match';
 
 export async function GET() {
   try {
-    const session = await auth();
-    
+    const session = await getServerSession(authOptions);
+
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -40,7 +40,7 @@ export async function GET() {
 
     const activities: any[] = [];
 
-    moodEntries.forEach(entry => {
+    moodEntries.forEach((entry: any) => {
       activities.push({
         _id: entry._id.toString(),
         type: 'mood',
@@ -50,7 +50,7 @@ export async function GET() {
       });
     });
 
-    conversations.forEach(conv => {
+    conversations.forEach((conv: any) => {
       if (conv.messages.length > 0) {
         activities.push({
           _id: conv._id.toString(),
@@ -62,7 +62,7 @@ export async function GET() {
       }
     });
 
-    posts.forEach(post => {
+    posts.forEach((post: any) => {
       activities.push({
         _id: post._id.toString(),
         type: 'post',
@@ -72,7 +72,7 @@ export async function GET() {
       });
     });
 
-    matches.forEach(match => {
+    matches.forEach((match: any) => {
       if (match.status === 'accepted') {
         activities.push({
           _id: match._id.toString(),
@@ -85,7 +85,7 @@ export async function GET() {
     });
 
     // Sort by timestamp and return top 20
-    activities.sort((a, b) => 
+    activities.sort((a, b) =>
       new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );
 

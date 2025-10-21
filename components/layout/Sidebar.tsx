@@ -59,8 +59,8 @@ export default function Sidebar() {
                   href={resource.href}
                   className={`
                     flex items-center gap-3 px-4 py-3 rounded-lg transition-all
-                    ${isActive 
-                      ? 'bg-purple-50 text-purple-700 font-medium' 
+                    ${isActive
+                      ? 'bg-purple-50 text-purple-700 font-medium'
                       : 'text-gray-600 hover:bg-gray-50'
                     }
                   `}
@@ -82,7 +82,7 @@ export default function Sidebar() {
           <p className="text-sm text-red-800 mb-3">
             If you're in crisis, help is available 24/7
           </p>
-          
+          <a
             href="tel:988"
             className="block w-full bg-red-600 text-white text-center py-2 rounded-lg font-semibold hover:bg-red-700 transition-colors"
           >
