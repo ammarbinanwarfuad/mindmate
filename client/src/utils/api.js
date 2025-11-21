@@ -20,7 +20,6 @@ api.interceptors.request.use(
         const token = await user.getIdToken(true);
         config.headers.Authorization = `Bearer ${token}`;
       } catch (error) {
-        console.error('Error getting auth token:', error);
         // Clear invalid token
         localStorage.removeItem('token');
       }
@@ -37,8 +36,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Handle unauthorized access
-      console.error('Unauthorized access');
+      // Handle unauthorized access - redirect to login if needed
     }
     return Promise.reject(error);
   }

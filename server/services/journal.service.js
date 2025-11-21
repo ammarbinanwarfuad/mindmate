@@ -61,7 +61,7 @@ export const analyzeSentiment = (text) => {
 /**
  * Extract themes from journal content
  */
-export const extractThemes = (text, category) => {
+export const extractThemes = (text) => {
   const themeKeywords = {
     relationships: ['friend', 'family', 'love', 'partner', 'relationship', 'connection', 'people'],
     work: ['work', 'job', 'career', 'project', 'meeting', 'boss', 'colleague'],

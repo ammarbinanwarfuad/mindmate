@@ -1,0 +1,23 @@
+{
+  "name": "mindmate-fullstack",
+  "version": "1.0.0",
+  "description": "MindMate - Mental Wellness Platform for University Students",
+  "private": true,
+  "scripts": {
+    "install:all": "npm install && cd client && npm install && cd ../server && npm install",
+    "dev:client": "cd client && npm run dev",
+    "dev:server": "cd server && npm run dev",
+    "build:client": "cd client && npm run build",
+    "start:server": "cd server && npm start",
+    "vercel-build": "cd client && npm install && npm run build"
+  },
+  "keywords": [
+    "mental-health",
+    "wellness",
+    "university",
+    "students",
+    "mindmate"
+  ],
+  "author": "",
+  "license": "MIT"
+}

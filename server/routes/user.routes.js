@@ -1,5 +1,4 @@
 import express from 'express';
-import User from '../models/User.model.js';
 import { authenticate } from '../middleware/auth.js';
 import { profileValidation, validate } from '../middleware/validation.js';
 

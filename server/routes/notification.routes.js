@@ -1,6 +1,5 @@
 import express from 'express';
 import Notification from '../models/Notification.model.js';
-import NotificationSchedule from '../models/NotificationSchedule.model.js';
 import { authenticate } from '../middleware/auth.js';
 import { getUserSchedule, updateSchedule } from '../services/notification.service.js';
 

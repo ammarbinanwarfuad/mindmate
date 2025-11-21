@@ -56,7 +56,11 @@ generateChallenges();
 
 // Middleware
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  origin: [
+    process.env.CLIENT_URL || 'http://localhost:3000',
+    'http://localhost:4173', // Vite preview
+    'http://localhost:5173'  // Vite dev
+  ],
   credentials: true
 }));
 app.use(express.json());

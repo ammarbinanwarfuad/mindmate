@@ -1,7 +1,6 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import User from '../models/User.model.js';
-import { ROLE_PERMISSIONS } from '../utils/permissions.js';
 
 dotenv.config();
 
@@ -55,7 +54,8 @@ async function createSuperAdmin() {
       console.log(`   Role: ${existingSuperAdmin.role}`);
       console.log(`   Admin Level: ${existingSuperAdmin.adminLevel}`);
       
-      const readline = require('readline').createInterface({
+      const { createInterface } = await import('readline');
+      const readline = createInterface({
         input: process.stdin,
         output: process.stdout
       });

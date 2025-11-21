@@ -1,6 +1,5 @@
 import NotificationSchedule from '../models/NotificationSchedule.model.js';
 import Notification from '../models/Notification.model.js';
-import User from '../models/User.model.js';
 import MoodEntry from '../models/MoodEntry.model.js';
 
 /**
@@ -96,11 +95,11 @@ export const createNotification = async (userId, type, title, message, data = {}
 /**
  * Send push notification (Firebase Cloud Messaging)
  */
-export const sendPushNotification = async (fcmToken, title, body, data = {}) => {
+export const sendPushNotification = async (fcmToken, title, body) => {
   // This would integrate with Firebase Cloud Messaging
   // For now, it's a placeholder
   try {
-    // const admin = require('firebase-admin');
+    // import admin from 'firebase-admin';
     // const message = {
     //   notification: { title, body },
     //   data,

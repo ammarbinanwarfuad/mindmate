@@ -19,24 +19,35 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Fetch user data from backend
+  const fetchUserData = async (firebaseUser = null) => {
+    try {
+      const response = await api.get('/auth/me');
+      console.log('User data from backend:', response.data.user);
+      setUser(response.data.user);
+      return response.data.user;
+    } catch (err) {
+      console.error('Error fetching user data:', err);
+      console.error('Error details:', err.response?.data || err.message);
+      // Fallback to basic user data if backend fails
+      if (firebaseUser) {
+        const fallbackUser = {
+          id: firebaseUser.uid,
+          email: firebaseUser.email,
+          profile: { name: firebaseUser.displayName || 'User' }
+        };
+        console.log('Using fallback user data:', fallbackUser);
+        setUser(fallbackUser);
+      }
+      return null;
+    }
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        try {
-          // Sync user with backend
-          const response = await api.post('/auth/sync', {
-            name: firebaseUser.displayName,
-            email: firebaseUser.email
-          });
-          setUser(response.data.user);
-        } catch (err) {
-          console.error('Error syncing user:', err);
-          setUser({
-            id: firebaseUser.uid,
-            email: firebaseUser.email,
-            profile: { name: firebaseUser.displayName || 'User' }
-          });
-        }
+        // Fetch full user data from backend
+        await fetchUserData(firebaseUser);
       } else {
         setUser(null);
       }
@@ -50,6 +61,7 @@ export const AuthProvider = ({ children }) => {
     try {
       setError(null);
       const result = await signInWithEmailAndPassword(auth, email, password);
+      // onAuthStateChanged will handle fetching user data
       return result.user;
     } catch (err) {
       setError(err.message);
@@ -104,7 +116,8 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     loginWithGoogle,
-    logout
+    logout,
+    refreshUser: fetchUserData
   };
 
   return (

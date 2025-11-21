@@ -135,7 +135,7 @@ router.post('/:provider/sync', authenticate, async (req, res) => {
         return res.status(400).json({ success: false, message: 'Unknown provider' });
     }
 
-    integration.recordSync(syncResult.status, syncResult.itemsSynced, syncResult.errors);
+    integration.recordSync(syncResult.status, syncResult.itemsSynced, syncResult.syncErrors);
     await integration.save();
 
     res.json({ success: true, syncResult, integration });
@@ -213,39 +213,39 @@ router.get('/spotify/playlists', authenticate, async (req, res) => {
 });
 
 // Helper functions (simulated - would use actual APIs in production)
-async function syncCalendar(integration) {
+async function syncCalendar(_integration) {
   // Simulate calendar sync
   return {
     status: 'success',
     itemsSynced: Math.floor(Math.random() * 10) + 1,
-    errors: []
+    syncErrors: []
   };
 }
 
-async function syncFitnessData(integration) {
+async function syncFitnessData(_integration) {
   // Simulate fitness data sync
   return {
     status: 'success',
     itemsSynced: Math.floor(Math.random() * 20) + 5,
-    errors: []
+    syncErrors: []
   };
 }
 
-async function syncSpotifyData(integration) {
+async function syncSpotifyData(_integration) {
   // Simulate Spotify sync
   return {
     status: 'success',
     itemsSynced: Math.floor(Math.random() * 5) + 1,
-    errors: []
+    syncErrors: []
   };
 }
 
-async function syncSleepData(integration) {
+async function syncSleepData(_integration) {
   // Simulate sleep data sync
   return {
     status: 'success',
     itemsSynced: Math.floor(Math.random() * 7) + 1,
-    errors: []
+    syncErrors: []
   };
 }
 

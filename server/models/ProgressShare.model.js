@@ -67,7 +67,6 @@ const progressShareSchema = new mongoose.Schema({
 
 // Indexes
 progressShareSchema.index({ userId: 1, therapistId: 1 });
-progressShareSchema.index({ accessToken: 1 });
 progressShareSchema.index({ status: 1, expiresAt: 1 });
 
 export default mongoose.model('ProgressShare', progressShareSchema);

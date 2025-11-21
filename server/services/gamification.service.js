@@ -155,7 +155,7 @@ const checkBadgeRequirement = (badge, progress) => {
 /**
  * Check special badge requirements
  */
-const checkSpecialBadge = (action, progress) => {
+const checkSpecialBadge = (action, _progress) => {
   switch (action) {
     case 'profile_complete':
       // Would check if user profile is complete

@@ -11,6 +11,9 @@ const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showQuickRelief, setShowQuickRelief] = useState(false);
 
+  // Debug: Log user data
+  console.log('Navbar user data:', user);
+
   const handleLogout = async () => {
     try {
       await logout();

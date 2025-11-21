@@ -1,6 +1,5 @@
 import User from '../models/User.model.js';
 import MoodEntry from '../models/MoodEntry.model.js';
-import Match from '../models/Match.model.js';
 
 export const findMatches = async (userId) => {
   try {

@@ -428,7 +428,7 @@ function calculateCorrelation(x, y) {
 /**
  * Helper: Get correlation strength label
  */
-function getCorrelationStrength(correlation) {
+export function getCorrelationStrength(correlation) {
   const abs = Math.abs(correlation);
   if (abs >= 0.7) return 'strong';
   if (abs >= 0.4) return 'moderate';

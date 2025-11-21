@@ -321,9 +321,7 @@ router.get('/reports', requirePermission('review_reports'), async (req, res) => 
       status = 'pending',
       type,
       page = 1,
-      limit = 20,
-      sortBy = 'createdAt',
-      sortOrder = 'desc'
+      limit = 20
     } = req.query;
 
     // Build query (assuming you have a Report model)

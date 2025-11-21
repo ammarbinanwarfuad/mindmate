@@ -191,7 +191,7 @@ router.get('/analytics-history', authenticate, async (req, res) => {
  */
 router.post('/voice-to-text', authenticate, async (req, res) => {
   try {
-    const { audioData, language = 'en' } = req.body;
+    const { language = 'en' } = req.body;
 
     // In production, this would use speech-to-text API
     // For now, return mock response
@@ -258,7 +258,7 @@ function interpretBehaviorData(context) {
 
 function interpretAssessmentData(assessmentData) {
   const interpretations = [];
-  const { phq9, gad7, stress } = assessmentData.latestScores;
+  const { phq9, gad7 } = assessmentData.latestScores;
   
   if (phq9 && phq9.totalScore < 5) {
     interpretations.push('Your depression screening shows minimal symptoms.');

@@ -128,7 +128,7 @@ router.get('/:id', requirePermission('view_users'), async (req, res) => {
  */
 router.post('/invite', requirePermission('create_moderators'), async (req, res) => {
   try {
-    const { email, role, adminLevel, permissions, name } = req.body;
+    const { email, role, adminLevel, permissions } = req.body;
 
     if (!email || !role) {
       return res.status(400).json({

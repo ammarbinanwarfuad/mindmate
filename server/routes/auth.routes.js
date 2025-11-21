@@ -1,5 +1,4 @@
 import express from 'express';
-import User from '../models/User.model.js';
 import { authenticate } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -29,7 +28,7 @@ router.get('/me', authenticate, async (req, res) => {
 // Sync user from Firebase
 router.post('/sync', authenticate, async (req, res) => {
   try {
-    const { name, email } = req.body;
+    const { name } = req.body;
     
     let user = req.user;
     

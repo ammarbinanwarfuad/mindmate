@@ -62,7 +62,7 @@ const integrationSchema = new mongoose.Schema({
       enum: ['success', 'partial', 'failed']
     },
     itemsSynced: Number,
-    errors: [String]
+    syncErrors: [String]
   }],
   lastError: {
     message: String,
@@ -83,11 +83,11 @@ integrationSchema.methods.isTokenExpired = function() {
 };
 
 // Method to record sync
-integrationSchema.methods.recordSync = function(status, itemsSynced, errors = []) {
+integrationSchema.methods.recordSync = function(status, itemsSynced, syncErrors = []) {
   this.syncHistory.push({
     status,
     itemsSynced,
-    errors
+    syncErrors
   });
   this.settings.lastSync = new Date();
   
